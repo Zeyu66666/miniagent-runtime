@@ -1,0 +1,9 @@
+{
+    "service": "gateway",
+    "replicas": 3,
+    "timeout_ms": 5000,
+    "features": [
+        "retry",
+        "circuit_breaker"
+    ]
+}

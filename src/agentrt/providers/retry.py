@@ -37,6 +37,12 @@ class RetryingProvider(BaseProvider):
         self.base_delay = base_delay
         self.timeout = timeout
 
+    async def aclose(self) -> None:
+        """包装器不自己持有连接，关的是内层。"""
+        close = getattr(self.inner, "aclose", None)
+        if close is not None:
+            await close()
+
     async def chat(
         self,
         messages: list[dict],

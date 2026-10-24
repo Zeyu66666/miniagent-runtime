@@ -1,0 +1,219 @@
+# ============================================================
+# 单步组（15 条）：一次工具调用就能答对
+# 考的是：会不会选工具、会不会填参数
+# ============================================================
+
+- id: s01
+  task: "读取 notes.txt 的内容，告诉我项目代号是什么。"
+  check: { type: contains, value: "Falcon" }
+  max_steps: 6
+
+- id: s02
+  task: "notes.txt 里的负责人是谁？"
+  check: { type: contains, value: "林工" }
+  max_steps: 6
+
+- id: s03
+  task: "notes.txt 里写的上线日期是哪一天？"
+  check: { type: contains, value: "2026-03-15" }
+  max_steps: 6
+
+- id: s04
+  task: "notes.txt 里记录的 P99 延迟是多少毫秒？"
+  check: { type: regex, value: "320" }
+  max_steps: 6
+
+- id: s05
+  task: "config.json 里 service 字段的值是什么？"
+  check: { type: contains, value: "gateway" }
+  max_steps: 6
+
+- id: s06
+  task: "config.json 里配置了几个副本（replicas）？"
+  check: { type: regex, value: "3" }
+  max_steps: 6
+
+- id: s07
+  task: "config.json 的 features 数组里有哪些功能？逐个列出。"
+  check: { type: contains, value: "circuit_breaker" }
+  max_steps: 6
+
+- id: s08
+  task: "当前目录下有哪些文件？把文件名都列出来。"
+  check: { type: contains, value: "numbers.csv" }
+  max_steps: 6
+
+- id: s09
+  task: "numbers.csv 里一共有几行数据（不含表头）？"
+  check: { type: regex, value: "4" }
+  max_steps: 6
+
+- id: s10
+  task: "numbers.csv 里 value 最大的是哪个 name？"
+  check: { type: contains, value: "gamma" }
+  max_steps: 8
+
+- id: s11
+  task: "bug.log 里出现了几次 ERROR？"
+  check: { type: regex, value: "2" }
+  max_steps: 8
+
+- id: s12
+  task: "bug.log 里最后一次 ERROR 的原因是什么？用一句话说。"
+  check: { type: contains, value: "timeout" }
+  max_steps: 8
+
+- id: s13
+  task: "bug.log 里 circuit breaker 的状态是什么？"
+  check: { type: contains, value: "OPEN" }
+  max_steps: 8
+
+- id: s14
+  task: "用 run_cmd 执行 echo hello-agent，把输出原样告诉我。"
+  check: { type: contains, value: "hello-agent" }
+  max_steps: 6
+
+- id: s15
+  task: "用 run_cmd 统计 notes.txt 有多少个字符（wc -c 或类似方式）。告诉我数字。"
+  check: { type: regex, value: "[0-9]" }
+  max_steps: 8
+
+# ============================================================
+# 多步组（15 条）：需要 2 次以上工具调用，且后一步依赖前一步结果
+# 考的是：会不会规划、会不会把上一步结果用进下一步
+# ============================================================
+
+- id: m01
+  task: "先读 config.json 拿到 timeout_ms，再读 bug.log 告诉我日志里的超时时间是否与配置一致。"
+  check: { type: regex, value: "5000" }
+  max_steps: 10
+
+- id: m02
+  task: "读 numbers.csv，算出所有 value 的总和，然后告诉我总和是多少。"
+  check: { type: regex, value: "55" }
+  max_steps: 10
+
+- id: m03
+  task: "读 numbers.csv，算出 value 的平均值，保留两位小数。"
+  check: { type: regex, value: "13\\.75" }
+  max_steps: 10
+
+- id: m04
+  task: "列出目录下所有文件，然后读出其中扩展名为 .json 的文件内容，告诉我它的 service 字段。"
+  check: { type: contains, value: "gateway" }
+  max_steps: 12
+
+- id: m05
+  task: "读 notes.txt 拿到上线日期，再读 config.json 拿到副本数，把这两个信息一起告诉我。"
+  check: { type: contains, value: "2026-03-15" }
+  max_steps: 12
+
+- id: m06
+  task: "读 bug.log，统计 ERROR 和 WARN 各出现几次，分别告诉我。"
+  check: { type: regex, value: "1" }
+  max_steps: 12
+
+- id: m07
+  task: "读 numbers.csv 找出最小值对应的 name，再告诉我那个值是多少。"
+  check: { type: contains, value: "delta" }
+  max_steps: 12
+
+- id: m08
+  task: "创建文件 summary.txt，内容写入 notes.txt 里的项目代号。完成后确认文件存在。"
+  check: { type: file_contains, value: "summary.txt", text: "Falcon" }
+  max_steps: 12
+
+- id: m09
+  task: "把 numbers.csv 里 value 大于 10 的 name 找出来，写入 big.txt，一行一个。"
+  check: { type: file_contains, value: "big.txt", text: "gamma" }
+  max_steps: 14
+
+- id: m10
+  task: "读 config.json，把 features 数组的每个元素单独一行写入 features.txt。"
+  check: { type: file_contains, value: "features.txt", text: "retry" }
+  max_steps: 12
+
+- id: m11
+  task: "统计当前目录下所有 .txt 文件的行数总和，告诉我数字。"
+  check: { type: regex, value: "[0-9]" }
+  max_steps: 14
+
+- id: m12
+  task: "读 bug.log 找出 circuit breaker 变成 OPEN 的时间戳，然后告诉我那一刻之前发生过几次 ERROR。"
+  check: { type: regex, value: "2" }
+  max_steps: 14
+
+- id: m13
+  task: "先列出目录，确认有没有 backup 目录；没有的话创建它，然后告诉我创建结果。"
+  check: { type: contains, value: "backup" }
+  max_steps: 14
+
+- id: m14
+  task: "读 numbers.csv，把每行的 name 转成大写，写入 upper.txt。"
+  check: { type: file_contains, value: "upper.txt", text: "GAMMA" }
+  max_steps: 14
+
+- id: m15
+  task: "读 notes.txt 和 config.json，判断 config.json 里的 replicas 是否为 3 且 notes.txt 里延迟指标是否为 320，两个都对就回答 OK，否则回答 FAIL。"
+  check: { type: contains, value: "OK" }
+  max_steps: 14
+
+# ============================================================
+# 错误恢复组（5 条）：故意让第一次工具调用失败
+# 考的是：报错之后会不会换个方式重试，而不是直接放弃或死循环
+# ============================================================
+
+- id: e01
+  task: "读取一个不存在的文件 missing.txt，如果读不到就改用 list_dir 看看目录里有什么，然后告诉我实际有哪些文件。"
+  check: { type: contains, value: "notes.txt" }
+  max_steps: 12
+
+- id: e02
+  task: "执行命令 cat not_exist_12345.txt。如果失败了，改成执行 echo fallback-ok 并把输出告诉我。"
+  check: { type: contains, value: "fallback-ok" }
+  max_steps: 12
+
+- id: e03
+  task: "尝试读取 data/none.csv。如果路径不对，先在目录里找到真正的 csv 文件，然后读出它的第一行。"
+  check: { type: contains, value: "name" }
+  max_steps: 14
+
+- id: e04
+  task: "运行 python -c 'raise ValueError(42)'，它会报错。把报错信息里的数字告诉我。"
+  check: { type: regex, value: "42" }
+  max_steps: 12
+
+- id: e05
+  task: "读取 notes.txt。如果第一次用了相对路径失败，就试一次绝对路径或先 list_dir 确认位置，最终告诉我项目代号。"
+  check: { type: contains, value: "Falcon" }
+  max_steps: 14
+
+# ============================================================
+# 边界组（5 条）：刁钻但合理，考鲁棒性
+# 考的是：会不会幻觉、会不会无脑输出
+# ============================================================
+
+- id: b01
+  task: "notes.txt 里有没有提到 K8s？如果没有，明确回答 NO_MENTION。"
+  check: { type: contains, value: "NO_MENTION" }
+  max_steps: 10
+
+- id: b02
+  task: "numbers.csv 里 value 等于 100 的行有几个？如果没有就回答 0。"
+  check: { type: regex, value: "0" }
+  max_steps: 10
+
+- id: b03
+  task: "读取 config.json 里不存在的字段 database，如果字段不存在，回答 FIELD_NOT_FOUND。"
+  check: { type: contains, value: "FIELD_NOT_FOUND" }
+  max_steps: 10
+
+- id: b04
+  task: "logs/ 目录存在吗？如果不存在，回答 NOT_EXISTS。"
+  check: { type: contains, value: "NOT_EXISTS" }
+  max_steps: 10
+
+- id: b05
+  task: "把 notes.txt 的内容原样重复一遍，一个字都不要改，尤其是日期格式。"
+  check: { type: contains, value: "2026-03-15" }
+  max_steps: 10

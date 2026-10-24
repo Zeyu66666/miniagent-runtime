@@ -24,3 +24,20 @@
 
 ### 为什么只重试四类异常
 ...
+
+
+┏━━━━━━━━━━━━┳━━━━━━━┓
+┃ 指标       ┃    值 ┃
+┡━━━━━━━━━━━━╇━━━━━━━┩
+│ 任务数     │    40 │
+│ 通过       │    37 │
+│ 成功率     │ 92.5% │
+│ 平均 token │  3280 │
+│ 平均步数   │  6.03 │
+└────────────┴───────┘
+
+
+失败 3 条：
+  m08 文件不存在：D:\project1\miniagent-runtime\eval\workspace\summary.txt
+  m09 文件不存在：D:\project1\miniagent-runtime\eval\workspace\big.txt
+  m10 文件不存在：D:\project1\miniagent-runtime\eval\workspace\features.txt

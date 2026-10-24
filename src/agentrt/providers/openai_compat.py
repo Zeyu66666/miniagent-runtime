@@ -34,6 +34,10 @@ class OpenAICompatProvider(BaseProvider):
         self.model = model
         self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
 
+    async def aclose(self) -> None:
+        """关掉底层 httpx 连接池。进程活着但 client 不关，句柄只增不减。"""
+        await self.client.close()
+
     async def chat(
         self,
         messages: list[dict],

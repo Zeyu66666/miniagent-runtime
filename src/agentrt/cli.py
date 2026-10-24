@@ -188,6 +188,13 @@ def serve(
 
     console.print(f"[cyan]后端启动中：http://{host}:{port}/docs[/cyan]")
     uvicorn.run(fastapi_app, host=host, port=port)
+    
+@app.command()
+def evaluate(tag: str = typer.Option("auto", "--tag")):
+    """跑评测集并生成报告。"""
+    from .eval.runner import main as run_eval
+
+    run_eval(tag)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,5 @@
+name,value
+ALPHA,12
+BETA,7
+GAMMA,31
+DELTA,5
