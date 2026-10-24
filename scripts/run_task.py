@@ -33,6 +33,7 @@ async def main() -> None:
     print(f"状态: {result['status']}")
     print(f"步数: {result['n_steps']}  token: {result['total_tokens']}")
     print(f"回答: {result['answer']}")
+    print(f"run_id: {result['run_id']}")
 
 
 if __name__ == "__main__":
