@@ -15,3 +15,5 @@ MODEL: str = os.getenv("DEFAULT_MODEL", "deepseek-chat")
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 DB_PATH = DATA_DIR / "traces.db"
+
+USE_COMPRESSION = os.getenv("USE_COMPRESSION", "1") == "1"

@@ -1,13 +1,16 @@
 import json
 import time
 import asyncio
+from ..config import USE_COMPRESSION
 from ..providers import BaseProvider, get_provider
 from ..providers.base import ToolCall
 from ..tools.base import Tool
 from ..tools.builtin import ALL_TOOLS
 from .trace import Step, Trace
-
+from .context import compress_messages, estimate_chars
 MAX_CONCURRENT_TOOLS = 4
+# 上下文长到多少字符才值得压缩（约 8~10k token）。实测低于 30k 字符时压缩是负收益。
+COMPRESS_THRESHOLD_CHARS = 30_000
 
 SYSTEM_PROMPT = """你是一个会使用工具的助手。
 
@@ -67,14 +70,20 @@ async def run_task(
     status = "max_steps"
 
     try:
+        step_idx = 0
         for _ in range(max_steps):
+            step_idx += 1
             # 预算熔断：钱花完了就停，不要无限制循环
             if trace.total_tokens > token_budget:
                 status = "budget_exceeded"
                 break
-
+            # 只有三件事同时成立才压缩：开关打开、过了前 2 步、上下文真的长起来了
+            if USE_COMPRESSION and step_idx >= 3 and estimate_chars(messages) > COMPRESS_THRESHOLD_CHARS:
+                compressed = compress_messages(messages, keep_recent=6)
+            else:
+                compressed = messages
             t0 = time.perf_counter()
-            resp = await provider.chat(messages, tools=schemas)
+            resp = await provider.chat(compressed, tools=schemas)
             elapsed = int((time.perf_counter() - t0) * 1000)
 
             trace.add_step(
