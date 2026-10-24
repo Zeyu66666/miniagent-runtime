@@ -16,6 +16,15 @@ def check(spec: dict, result: dict, workspace: Path) -> tuple[bool, str]:
             return True, ""
         return False, f"答案中缺少 {needle!r}；实际答案：{final[:200]!r}"
 
+    if kind == "contains_any":
+        # 同一个事实有多种合法写法（2026-03-15 / 2026 年 3 月 15 日），
+        # 判分不该因为格式判人失败
+        needles = [str(v) for v in spec["values"]]
+        for needle in needles:
+            if needle in final:
+                return True, ""
+        return False, f"答案中缺少任一表述 {needles}；实际答案：{final[:200]!r}"
+
     if kind == "not_contains":
         needle = str(spec["value"])
         if needle not in final:

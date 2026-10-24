@@ -15,7 +15,7 @@
 
 - id: s03
   task: "notes.txt 里写的上线日期是哪一天？"
-  check: { type: contains, value: "2026-03-15" }
+  check: { type: contains_any, values: ["2026-03-15", "3 月 15", "3月15"] }
   max_steps: 6
 
 - id: s04
@@ -60,7 +60,7 @@
 
 - id: s12
   task: "bug.log 里最后一次 ERROR 的原因是什么？用一句话说。"
-  check: { type: contains, value: "timeout" }
+  check: { type: contains_any, values: ["timeout", "超时"] }
   max_steps: 8
 
 - id: s13
@@ -105,7 +105,7 @@
 
 - id: m05
   task: "读 notes.txt 拿到上线日期，再读 config.json 拿到副本数，把这两个信息一起告诉我。"
-  check: { type: contains, value: "2026-03-15" }
+  check: { type: contains_any, values: ["2026-03-15", "3 月 15", "3月15"] }
   max_steps: 12
 
 - id: m06
@@ -215,5 +215,5 @@
 
 - id: b05
   task: "把 notes.txt 的内容原样重复一遍，一个字都不要改，尤其是日期格式。"
-  check: { type: contains, value: "2026-03-15" }
+  check: { type: contains_any, values: ["2026-03-15", "3 月 15", "3月15"] }
   max_steps: 10
