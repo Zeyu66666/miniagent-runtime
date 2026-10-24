@@ -1,11 +1,13 @@
 import json
 import time
-
+import asyncio
 from ..providers import BaseProvider, get_provider
 from ..providers.base import ToolCall
 from ..tools.base import Tool
 from ..tools.builtin import ALL_TOOLS
 from .trace import Step, Trace
+
+MAX_CONCURRENT_TOOLS = 4
 
 SYSTEM_PROMPT = """你是一个会使用工具的助手。
 
@@ -112,22 +114,30 @@ async def run_task(
                 }
             )
 
-            # 执行工具，并把结果逐条写回
-            for call in resp.tool_calls:
-                t1 = time.perf_counter()
-                output = await _exec_tool(call, tool_map)
-                tool_elapsed = int((time.perf_counter() - t1) * 1000)
-
-                trace.add_step(
-                    Step(
-                        kind="tool",
-                        name=call.name,
-                        arguments=call.arguments,
-                        output=output,
-                        error=call.parse_error,
-                        duration_ms=tool_elapsed,
+            # 执行工具：并发跑，但结果按原顺序回填
+            semaphore = asyncio.Semaphore(MAX_CONCURRENT_TOOLS)
+            async def _run_one(call: ToolCall) -> str:
+                async with semaphore:
+                    t1 = time.perf_counter()
+                    output = await _exec_tool(call, tool_map)
+                    tool_elapsed = int((time.perf_counter() - t1) * 1000)
+                    trace.add_step(
+                        Step(
+                            kind="tool",
+                            name=call.name,
+                            arguments=call.arguments,
+                            output=output,
+                            error=call.parse_error,
+                            duration_ms=tool_elapsed,
+                        )
                     )
-                )
+                    return output
+
+            outputs = await asyncio.gather(
+                *[_run_one(c) for c in resp.tool_calls]
+            )
+
+            for call, output in zip(resp.tool_calls, outputs):
                 messages.append(
                     {
                         "role": "tool",
